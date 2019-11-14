@@ -1,0 +1,13 @@
+[package]
+name = "ingredients_bot"
+version = "0.1.0"
+authors = ["Benjamin Congdon <bencongdon96@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+egg-mode = "0.13.0"
+rusqlite = "0.20.0"
+titlecase = "0.9"
+
