@@ -10,4 +10,5 @@ edition = "2018"
 egg-mode = "0.13.0"
 rusqlite = "0.20.0"
 titlecase = "0.9"
+tokio = "0.1.22"
 
