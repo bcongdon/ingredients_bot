@@ -12,3 +12,16 @@ rusqlite = "0.20.0"
 titlecase = "0.9"
 tokio = "0.1.22"
 libsqlite3-sys = { version = "*", features = ["bundled"] }
+simple-server = "0.4.0"
+
+[lib]
+name = "ingredients_bot"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ingredients_bot"
+path = "src/cli.rs"
+
+[[bin]]
+name = "ingredients_bot_server"
+path = "src/server.rs"
