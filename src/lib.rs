@@ -1,11 +1,15 @@
 extern crate egg_mode;
+extern crate phf;
 extern crate rusqlite;
 extern crate simple_server;
 extern crate titlecase;
 extern crate tokio;
 
+use phf::phf_map;
 use rusqlite::Connection;
 use rusqlite::NO_PARAMS;
+use std::collections::HashSet;
+
 use tokio::runtime::current_thread::block_on_all;
 
 #[derive(Debug)]
@@ -26,9 +30,22 @@ impl Food {
     }
 
     pub fn to_tweets(&self) -> Vec<String> {
-        self.ingredients.iter().enumerate().fold(
-            vec![self.header() + &format!("\n\nIngredients ({}): ", self.ingredients.len())],
-            |mut acc, (idx, x)| {
+        let attributes_str: String = self
+            .attributes()
+            .iter()
+            .map(|a| a.to_string())
+            .collect::<Vec<_>>()
+            .join(" ");
+        let header = format!(
+            "{} \n\n{}\n\nIngredients ({}): ",
+            self.header(),
+            attributes_str,
+            self.ingredients.len()
+        );
+        self.ingredients
+            .iter()
+            .enumerate()
+            .fold(vec![header], |mut acc, (idx, x)| {
                 let last = acc.last_mut().unwrap();
                 if last.len() + x.len() > 240 {
                     last.truncate(last.len() - 1);
@@ -43,8 +60,130 @@ impl Food {
                     }
                 }
                 acc
-            },
-        )
+            })
+    }
+
+    fn attributes(&self) -> HashSet<Attribute> {
+        self.ingredients
+            .iter()
+            .flat_map(|i| Attribute::for_ingredient(i.to_string()))
+            .collect()
+    }
+}
+
+#[derive(PartialEq, Eq, Hash, Clone, Copy)]
+enum Attribute {
+    Dairy,
+    Soy,
+    Corn,
+    Wheat,
+    Potato,
+    Tomato,
+    Honey,
+    Coconut,
+    Sunflower,
+    Peanut,
+    Egg,
+    Palm,
+    Liquor,
+    Chicken,
+    Beef,
+    Rice,
+    Chocolate,
+    Pumpkin,
+    Artificial,
+    Mushroom,
+    Salt,
+    Cheese,
+}
+
+static KEYWORDS: phf::Map<&'static str, Attribute> = phf_map! {
+    "wheat" => Attribute::Wheat,
+    "gluten" => Attribute::Wheat,
+    "corn" => Attribute::Corn,
+    "soy" => Attribute::Soy,
+    "milk" => Attribute::Dairy,
+    "casein" => Attribute::Dairy,
+    "lactose" => Attribute::Dairy,
+    "lactic" => Attribute::Dairy,
+    "butter" => Attribute::Dairy,
+    "cream" => Attribute::Dairy,
+    "whey" => Attribute::Dairy,
+    "cheese" => Attribute::Cheese,
+    "potato" => Attribute::Potato,
+    "tomato" => Attribute::Tomato,
+    "tomatillos" => Attribute::Tomato,
+    "honey" => Attribute::Honey,
+    "coconut" => Attribute::Coconut,
+    "sunflower" => Attribute::Sunflower,
+    "peanut" => Attribute::Peanut,
+    "egg" => Attribute::Egg,
+    "palm" => Attribute::Palm,
+    "liquor" => Attribute::Liquor,
+    "spirit" => Attribute::Liquor,
+    "chicken" => Attribute::Chicken,
+    "beef" => Attribute::Beef,
+    "steak" => Attribute::Beef,
+    "rice" => Attribute::Rice,
+    "chocolate" => Attribute::Chocolate,
+    "cocoa" => Attribute::Chocolate,
+    "pumpkin" => Attribute::Pumpkin,
+    "squash" => Attribute::Pumpkin,
+    "artificial" => Attribute::Artificial,
+    "hydrogen" => Attribute::Artificial,
+    "phosphate" => Attribute::Artificial,
+    "sulfite" => Attribute::Artificial,
+    "sulfate" => Attribute::Artificial,
+    "nitrate" => Attribute::Artificial,
+    "modified" => Attribute::Artificial,
+    "preservative" => Attribute::Artificial,
+    "mushroom" => Attribute::Mushroom,
+    "porcini" => Attribute::Mushroom,
+    "portobell" => Attribute::Mushroom,
+    "shiitake" => Attribute::Mushroom,
+    "salt" => Attribute::Salt,
+    "sodium" => Attribute::Salt,
+};
+
+impl Attribute {
+    pub fn for_ingredient(ingredient: String) -> HashSet<Attribute> {
+        let ingredient = ingredient.to_ascii_lowercase();
+
+        KEYWORDS
+            .entries()
+            .filter(|(&k, _)| ingredient.contains(k))
+            .map(|(_, v)| *v)
+            .collect()
+    }
+}
+
+impl std::string::ToString for Attribute {
+    fn to_string(&self) -> String {
+        match self {
+            Attribute::Dairy => "🥛",
+            Attribute::Soy => "🍢",
+            Attribute::Wheat => "🍞",
+            Attribute::Corn => "🌽",
+            Attribute::Potato => "🥔",
+            Attribute::Tomato => "🍅",
+            Attribute::Honey => "🍯",
+            Attribute::Coconut => "🥥",
+            Attribute::Sunflower => "🌻",
+            Attribute::Peanut => "🥜",
+            Attribute::Egg => "🥚",
+            Attribute::Palm => "🌴",
+            Attribute::Liquor => "🍸",
+            Attribute::Chicken => "🐓",
+            Attribute::Beef => "🐄",
+            Attribute::Rice => "🍚",
+            Attribute::Chocolate => "🍫",
+            Attribute::Pumpkin => "🎃",
+            Attribute::Artificial => "🧪",
+            Attribute::Mushroom => "🍄",
+            Attribute::Salt => "🧂",
+            Attribute::Cheese => "🧀",
+        }
+        .to_string()
     }
 }
 

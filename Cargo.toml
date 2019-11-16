@@ -14,6 +14,7 @@ titlecase = "0.9"
 tokio = "0.1.22"
 libsqlite3-sys = { version = "*", features = ["bundled"] }
 simple-server = "0.4.0"
+phf = { version = "0.8", features = ["macros"] }
 
 [lib]
 name = "ingredients_bot"
