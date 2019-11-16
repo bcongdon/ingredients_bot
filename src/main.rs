@@ -75,7 +75,7 @@ fn title_case(s: String) -> String {
 }
 
 fn main() -> rusqlite::Result<()> {
-    let conn = Connection::open("food.db")?;
+    let conn = Connection::open(std::env::var("FOOD_DB").unwrap_or("food.db".to_string()))?;
 
     let mut stmt = conn.prepare(
         "SELECT brand_owner, description, ingredients
