@@ -26,7 +26,7 @@ impl Food {
 
     fn to_tweets(&self) -> Vec<String> {
         self.ingredients.iter().enumerate().fold(
-            vec![self.header() + "\n\nIngredients: "],
+            vec![self.header() + &format!("\n\nIngredients ({}): ", self.ingredients.len())],
             |mut acc, (idx, x)| {
                 let last = acc.last_mut().unwrap();
                 if last.len() + x.len() > 240 {
@@ -81,6 +81,7 @@ fn main() -> rusqlite::Result<()> {
         "SELECT brand_owner, description, ingredients
         FROM branded_food
         JOIN food ON food.fdc_id = branded_food.fdc_id
+        WHERE LENGTH(TRIM(ingredients)) > 0
         ORDER BY RANDOM()
         LIMIT 11;",
     )?;
@@ -101,7 +102,6 @@ fn main() -> rusqlite::Result<()> {
         .unwrap();
 
     println!("{}", food.to_tweets().join("\n---\n"));
-
     let config = Config::load();
 
     let mut prev_tweet_id: Option<u64> = None;
