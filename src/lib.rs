@@ -19,7 +19,7 @@ const UNBRANDED_OWNER: &str = "Not a Branded Item";
 
 impl Food {
     fn header(&self) -> String {
-        if self.brand_owner == UNBRANDED_OWNER.to_owned() {
+        if self.brand_owner == UNBRANDED_OWNER {
             return format!("\"{}\"", self.description);
         }
         format!("\"{}\" (by {})", self.description, self.brand_owner)
